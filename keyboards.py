@@ -1,3 +1,5 @@
+
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 
 from config import CHANNELS
@@ -381,3 +383,32 @@ def cancel_keyboard():
             )
         ]
     ])
+
+
+
+def get_membership_keyboard(missing_channels=None):
+    """Create join buttons and a membership verification button."""
+
+    channels = missing_channels if missing_channels is not None else CHANNELS
+    keyboard = []
+
+    for channel in channels:
+        name = channel.get("name", "Join Channel")
+        url = channel.get("url")
+
+        if url:
+            keyboard.append([
+                InlineKeyboardButton(
+                    text=f"➕ Join {name}",
+                    url=url,
+                )
+            ])
+
+    keyboard.append([
+        InlineKeyboardButton(
+            text="✅ Verify Membership",
+            callback_data="verify_membership",
+        )
+    ])
+
+    return InlineKeyboardMarkup(keyboard)

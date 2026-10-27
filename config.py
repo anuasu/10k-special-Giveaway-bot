@@ -5,10 +5,11 @@ from zoneinfo import ZoneInfo
 # SF ARMY 10K GIVEAWAY BOT
 # ==========================================
 
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+BOT_TOKEN = "8606222870:AAFVqnQRMhsFM7nxkatSy62xGYj9I3f6O78"
 
 ADMIN_IDS = [
-    123456789,  # Replace with your Telegram Admin ID
+    8872609272, 
+    7331380618, # Replace with your Telegram Admin ID
 ]
 
 # ==========================================

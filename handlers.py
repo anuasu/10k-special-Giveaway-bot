@@ -10,7 +10,7 @@ from telegram.ext import (
 
 from config import BOT_TOKEN
 from database import init_db
-from handlers import register_user_handlers
+
 from scheduler import setup_scheduler
 from admin import is_admin
 from keyboards import admin_panel_keyboard

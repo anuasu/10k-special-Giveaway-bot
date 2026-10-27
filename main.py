@@ -1,13 +1,14 @@
 import logging
 
 from telegram import Update
+from telegram.constants import ChatType
 from telegram.ext import (
     Application,
     CommandHandler,
     ContextTypes,
 )
 
-from config import BOT_TOKEN, TIMEZONE
+from config import BOT_TOKEN
 from database import init_db
 from handlers import register_user_handlers
 from scheduler import setup_scheduler
@@ -28,6 +29,19 @@ logger = logging.getLogger(__name__)
 
 
 # ==============================
+# PRIVATE CHAT CHECK
+# ==============================
+
+def is_private_chat(update: Update) -> bool:
+    chat = update.effective_chat
+
+    return (
+        chat is not None
+        and chat.type == ChatType.PRIVATE
+    )
+
+
+# ==============================
 # ADMIN PANEL
 # ==============================
 
@@ -35,7 +49,11 @@ async def admin_command(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ):
-    """Open the admin panel for authorized admins."""
+    """Allow admin panel access only in private chats."""
+
+    # Completely ignore commands from groups and channels.
+    if not is_private_chat(update):
+        return
 
     user = update.effective_user
     message = update.effective_message
@@ -65,7 +83,7 @@ async def error_handler(
     update: object,
     context: ContextTypes.DEFAULT_TYPE,
 ):
-    """Log unexpected Telegram handler errors."""
+    """Log unexpected handler errors."""
 
     logger.error(
         "An exception occurred while processing an update:",
@@ -74,11 +92,11 @@ async def error_handler(
 
 
 # ==============================
-# POST-INITIALIZATION
+# POST INITIALIZATION
 # ==============================
 
 async def post_init(application: Application):
-    """Initialize scheduled jobs after the application starts."""
+    """Initialize scheduled jobs."""
 
     setup_scheduler(application)
 
@@ -95,11 +113,9 @@ def main():
             "Please add your Telegram bot token in config.py."
         )
 
-    # Initialize database tables.
     init_db()
     logger.info("Database initialized.")
 
-    # Build Telegram application.
     application = (
         Application.builder()
         .token(BOT_TOKEN)
@@ -107,20 +123,16 @@ def main():
         .build()
     )
 
-    # Register user-facing handlers.
     register_user_handlers(application)
 
-    # Register admin panel command.
     application.add_handler(
         CommandHandler("admin", admin_command)
     )
 
-    # Register global error handler.
     application.add_error_handler(error_handler)
 
     logger.info("SF ARMY 10K Giveaway Bot is starting...")
 
-    # Start polling and process Telegram updates.
     application.run_polling(
         allowed_updates=Update.ALL_TYPES,
         drop_pending_updates=False,
